@@ -1,5 +1,7 @@
 import numpy as np
 import random
+from PIL import Image
+from matplotlib import pyplot as plt
 
 class Battleship(object):
     """
@@ -61,12 +63,15 @@ class Field(object):
 
     def __init__(self, size: tuple):
         self.cells = {(x,y): Cell((x,y)) for x in range(size[0]) for y in range(size[1])}
+        self.matrix = np.zeros(size+(2,))
         self.occupied_cells = list()
-        #return np.zeros(size+(2,))
+        self.ships_matrix = self.matrix[:,:,0]
+        self.fire_matrix = self.matrix[:,:,1]
     
     def updateOccupied(self, new_occupied: list):
         for cell in new_occupied:
             cell.is_occupied = True
+            self.matrix[cell.coords+(0,)] = 1.0
             self.occupied_cells.append(cell)
 
     def areOccupied(self, cells: list):
@@ -99,3 +104,10 @@ class Cell(object):
         """
         return self.coords.__str__()
 
+
+if __name__ == "__main__":
+    while True:
+        bs = Battleship()
+        sm = bs.field.ships_matrix
+        plt.imshow(sm, interpolation='nearest')
+        plt.show()
