@@ -2,6 +2,7 @@ import numpy as np
 import random
 from PIL import Image
 from matplotlib import pyplot as plt
+import sys
 
 class Battleship(object):
     """
@@ -17,6 +18,7 @@ class Battleship(object):
         self.field_size = field_size
         self.field = Field(self.field_size)
         self.ships = [Ship(size) for size in self.ship_sizes]
+        self.fire_count = 0
 
         for ship in self.ships:
             self.placeShip(ship)            
@@ -40,6 +42,55 @@ class Battleship(object):
         new_cells = [self.field.cells[ship_coord] for ship_coord in ship_coords]
         ship.setCells(new_cells)
         self.field.updateOccupied(new_cells)
+
+    def fireCell(self, cell):
+        if cell not in self.field.fired_cells:
+            self.field.updateFired(cell)
+            self.fire_count += 1
+            return 1
+        print("Cell already fired. Choose another one!")
+        return 0
+
+    def play(self):
+        self.showShips()
+        # while there is at least undestroyed ship
+        f, axarr = plt.subplots(1,3)
+        while not all(map(Ship.isDestroyed, self.ships)):
+            b = False
+            while not b:
+                try:
+                    sys.stdout.write("\r x ")
+                    sys.stdout.flush()
+                    x = int(input())
+                    sys.stdout.write("y ")
+                    y = int(input())
+                    sys.stdout.flush()
+                    b = self.fireCell(self.field.cells[(x,y)])
+                except:
+                    print("Invalid value!")
+            
+            self.showState(f, axarr)
+        print("Finished after {} moves.".format(self.fire_count))
+
+    def showState(self, f, axarr):
+        fm = self.field.fire_matrix
+        sm = self.field.ships_matrix
+
+        axarr[0].imshow(fm)
+        axarr[1].imshow(sm)
+        axarr[2].imshow(fm+sm>1)
+        plt.ion()
+        plt.show()
+
+    def showFired(self):
+        fm = self.field.fire_matrix
+        plt.imshow(fm, interpolation='nearest')
+        plt.show()
+
+    def showShips(self):
+        sm = self.field.ships_matrix
+        plt.imshow(sm, interpolation='nearest')
+        plt.show()
     
 
 class Ship(object):
@@ -57,6 +108,10 @@ class Ship(object):
         for cell in cells:
             self.cells.append(cell)
 
+    def isDestroyed(self):
+        # A ship is considered as destroyed if all its cells are fired
+        return all(map(Cell.isFired, self.cells))
+
 
 
 class Field(object):
@@ -65,6 +120,7 @@ class Field(object):
         self.cells = {(x,y): Cell((x,y)) for x in range(size[0]) for y in range(size[1])}
         self.matrix = np.zeros(size+(2,))
         self.occupied_cells = list()
+        self.fired_cells = list()
         self.ships_matrix = self.matrix[:,:,0]
         self.fire_matrix = self.matrix[:,:,1]
     
@@ -73,6 +129,11 @@ class Field(object):
             cell.is_occupied = True
             self.matrix[cell.coords+(0,)] = 1.0
             self.occupied_cells.append(cell)
+
+    def updateFired(self, firedCell):
+        firedCell.fire()
+        self.fired_cells.append(firedCell)
+        self.matrix[firedCell.coords+(1,)] = 1.0
 
     def areOccupied(self, cells: list):
         # if there is at least one occupied cell in the list
@@ -88,6 +149,9 @@ class Cell(object):
         
     def isOccupied(self):
         return self.is_occupied
+
+    def isFired(self):
+        return self.is_fired
 
     def fire(self):
         self.is_fired = True
@@ -106,8 +170,5 @@ class Cell(object):
 
 
 if __name__ == "__main__":
-    while True:
-        bs = Battleship()
-        sm = bs.field.ships_matrix
-        plt.imshow(sm, interpolation='nearest')
-        plt.show()
+    bs = Battleship()
+    bs.play()
