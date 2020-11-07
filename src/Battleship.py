@@ -75,7 +75,7 @@ class Battleship(object):
             self.showState(f, axarr)
         print("Finished after {} moves.".format(self.fire_count))
     
-    def simulate(self, num_games):
+    def simulate(self):
         f, axarr = plt.subplots(1, 2, sharex=True, sharey=True)
         for ax in axarr:
             ax.set(adjustable='box', aspect='equal')
@@ -86,7 +86,16 @@ class Battleship(object):
             input()
             self.showState(f, axarr)
         print("Finished after {} moves.".format(self.fire_count))
-
+    
+    def genarateData(self):
+        sm = self.field.ships_matrix
+        states, answers = list(), list()
+        while not all(map(Ship.isDestroyed, self.ships)):
+            selected_cell = random.choice(self.field.intact_cells)
+            self.fireCell(selected_cell)
+            states.append(np.stack((sm, self.field.fire_matrix), axis=2))
+            answers.append(sm[selected_cell.coords] == 1.0)
+        return states, answers
 
     def showState(self, f, axarr):
         fm = self.field.fire_matrix
@@ -106,7 +115,8 @@ class Battleship(object):
         sm = self.field.ships_matrix
         plt.imshow(sm, interpolation='nearest')
         plt.show()
-    
+
+
 
 class Ship(object):
 
@@ -196,5 +206,8 @@ class Cell(object):
 
 
 if __name__ == "__main__":
+    k = 10
     bs = Battleship()
-    bs.simulate(100)
+    states, answers = bs.genarateData()
+    print(states[k][:,:,0])
+    print(states[k][:,:,1])
