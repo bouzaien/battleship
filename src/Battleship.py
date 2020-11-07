@@ -2,6 +2,7 @@ import numpy as np
 import random
 from PIL import Image
 from matplotlib import pyplot as plt
+import seaborn as sns
 import sys
 
 class Battleship(object):
@@ -52,19 +53,19 @@ class Battleship(object):
         return 0
 
     def play(self):
-        self.showShips()
+        # self.showShips()
         # while there is at least undestroyed ship
-        f, axarr = plt.subplots(1,3)
+        f, axarr = plt.subplots(1, 2, sharex=True, sharey=True)
         while not all(map(Ship.isDestroyed, self.ships)):
             b = False
             while not b:
                 try:
+                    sys.stdout.write("Move number {}\n".format(self.fire_count+1))
                     sys.stdout.write("\r x ")
-                    sys.stdout.flush()
                     x = int(input())
-                    sys.stdout.write("y ")
-                    y = int(input())
                     sys.stdout.flush()
+                    sys.stdout.write("\r y ")
+                    y = int(input())
                     b = self.fireCell(self.field.cells[(x,y)])
                 except:
                     print("Invalid value!")
@@ -75,10 +76,10 @@ class Battleship(object):
     def showState(self, f, axarr):
         fm = self.field.fire_matrix
         sm = self.field.ships_matrix
-
-        axarr[0].imshow(fm)
-        axarr[1].imshow(sm)
-        axarr[2].imshow(fm+sm>1)
+        sns.heatmap(sm, ax=axarr[0], vmin=0, vmax=2, cbar=False, linewidths=.5)
+        sns.heatmap(fm * sm + fm, ax=axarr[1], vmin=0, vmax=2, cbar=False, linewidths=.5)
+        for ax in axarr:
+            ax.set(adjustable='box', aspect='equal')
         plt.ion()
         plt.show()
 
