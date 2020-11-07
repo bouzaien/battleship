@@ -1,5 +1,6 @@
 import random
 import sys
+import time
 
 from matplotlib import pyplot as plt
 import numpy as np
@@ -74,12 +75,17 @@ class Battleship(object):
             self.showState(f, axarr)
         print("Finished after {} moves.".format(self.fire_count))
     
-    # TODO complete simulation function
-    def simulate(self, parameter_list):
-        """
-        docstring
-        """
-        pass
+    def simulate(self, num_games):
+        f, axarr = plt.subplots(1, 2, sharex=True, sharey=True)
+        for ax in axarr:
+            ax.set(adjustable='box', aspect='equal')
+        while not all(map(Ship.isDestroyed, self.ships)):
+            sys.stdout.write("Move number {}\n".format(self.fire_count+1))
+            selected_cell = random.choice(self.field.intact_cells)
+            self.fireCell(selected_cell)
+            input()
+            self.showState(f, axarr)
+        print("Finished after {} moves.".format(self.fire_count))
 
 
     def showState(self, f, axarr):
@@ -87,8 +93,7 @@ class Battleship(object):
         sm = self.field.ships_matrix
         sns.heatmap(sm, ax=axarr[0], vmin=0, vmax=2, cbar=False, linewidths=.5)
         sns.heatmap(fm * sm + fm, ax=axarr[1], vmin=0, vmax=2, cbar=False, linewidths=.5)
-        for ax in axarr:
-            ax.set(adjustable='box', aspect='equal')
+        
         plt.ion()
         plt.show()
 
@@ -130,7 +135,9 @@ class Field(object):
         self.cells = {(x,y): Cell((x,y)) for x in range(size[0]) for y in range(size[1])}
         self.matrix = np.zeros(size+(2,))
         self.occupied_cells = list()
+        self.free_cells = list(self.cells.values())
         self.fired_cells = list()
+        self.intact_cells = list(self.cells.values())
         self.ships_matrix = self.matrix[:,:,0]
         self.fire_matrix = self.matrix[:,:,1]
     
@@ -139,11 +146,13 @@ class Field(object):
             cell.is_occupied = True
             self.matrix[cell.coords+(0,)] = 1.0
             self.occupied_cells.append(cell)
+            self.free_cells.remove(cell)
 
     def updateFired(self, firedCell):
         firedCell.fire()
         self.fired_cells.append(firedCell)
         self.matrix[firedCell.coords+(1,)] = 1.0
+        self.intact_cells.remove(firedCell)
 
     def areOccupied(self, cells: list):
         # if there is at least one occupied cell in the list
@@ -177,8 +186,15 @@ class Cell(object):
         To display coordinates when calling a cell.
         """
         return self.coords.__str__()
+    
+    def __hash__(self):
+        """
+        Useful to create set of cells
+        """
+        return hash(self.coords)
+        
 
 
 if __name__ == "__main__":
     bs = Battleship()
-    bs.play()
+    bs.simulate(100)
