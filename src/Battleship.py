@@ -1,9 +1,11 @@
-import numpy as np
 import random
-from PIL import Image
-from matplotlib import pyplot as plt
-import seaborn as sns
 import sys
+
+from matplotlib import pyplot as plt
+import numpy as np
+from PIL import Image
+import seaborn as sns
+
 
 class Battleship(object):
     """
@@ -53,7 +55,6 @@ class Battleship(object):
         return 0
 
     def play(self):
-        # self.showShips()
         # while there is at least undestroyed ship
         f, axarr = plt.subplots(1, 2, sharex=True, sharey=True)
         while not all(map(Ship.isDestroyed, self.ships)):
@@ -72,6 +73,14 @@ class Battleship(object):
             
             self.showState(f, axarr)
         print("Finished after {} moves.".format(self.fire_count))
+    
+    # TODO complete simulation function
+    def simulate(self, parameter_list):
+        """
+        docstring
+        """
+        pass
+
 
     def showState(self, f, axarr):
         fm = self.field.fire_matrix
