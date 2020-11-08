@@ -19,6 +19,7 @@ def main():
 
     args = parser.parse_args()
 
+    # create a game instance and start playing
     bs = Battleship(field_size=(args.size,args.size))
     bs.play(show_positions=args.show_positions)
 
