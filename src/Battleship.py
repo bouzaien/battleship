@@ -97,7 +97,7 @@ class Battleship(object):
             self.fireCell(selected_cell)
             states.append(np.stack((sm, self.field.fire_matrix), axis=2))
             answers.append(sm[selected_cell.coords] == 1.0)
-        return np.asarray(states), np.asarray(answers)
+        return np.asarray(states), np.asarray(answers).astype(int)
 
     def showState(self, f, axarr):
         if f is None:
