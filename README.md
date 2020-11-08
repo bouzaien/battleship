@@ -10,6 +10,10 @@ cd battleship
 pip install -r requirements.txt
 ```
 
+Install this codebase as a package in this environment.
+
+python setup.py install --user
+
 
 ## Play a Game
 
@@ -22,7 +26,11 @@ python src/play.py --show_position
 
 ## Simulate a Game
 
-To simulate a game, use the `src/simulate.py` script.
+To simulate a game, use the `src/simulate.py` script. Add `--update_rate <value>` argument to set the figure update rate value. Default value is 0.5 seconds.
+
+```text
+python src/simulate.py --update_rate 0.5
+```
 
 
 ## Generate Data
@@ -37,4 +45,11 @@ Example
 
 ```text
 python src/generate_data.py --games 1000 --output_folder data --file_name generated_data
+```
+
+## Test Functionalities
+To perform unit tests, use the `src/test.py` without any parameters.
+
+```text
+python src/test.py
 ```
