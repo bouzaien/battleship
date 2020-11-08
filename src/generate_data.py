@@ -1,9 +1,10 @@
 import os
 
 import argparse
-import tqdm
+import numpy as np
+from tqdm import tqdm
 
-from Battleship import *
+from Battleship import Battleship
 
 def main():
     parser = argparse.ArgumentParser()
@@ -31,17 +32,18 @@ def main():
     samples_list = list()
     answers_list = list()
 
-    for _ in tqdm.tqdm(range(args.games)):
+    for _ in tqdm(range(args.games)):
+        # create a game instance and generate data
         bs = Battleship()
         states, answers = bs.genarateData()
         samples_list.append(states)
         answers_list.append(answers)
     
-    # concatenate the samples of each played games to get a tuple of ()
+    # concatenate the samples of each played games to get a tuple of (Xs, ys)
     generated_data = (np.concatenate(samples_list, axis=0), np.concatenate(answers_list, axis=0))
 
+    # save to disk
     os.makedirs(args.output_folder, exist_ok=True)
-
     for data, Xy in zip(generated_data, ['X', 'y']):
         file_name = args.file_name + "_" + Xy + "_" + str(args.games) + ".npy"
         full_path = os.path.join(args.output_folder, file_name)
