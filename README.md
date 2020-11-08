@@ -1,5 +1,5 @@
 ## Repository Setup
-1. Install Minicinda, follow https://docs.conda.io/en/latest/miniconda.html
+1. Install Miniconda, follow https://docs.conda.io/en/latest/miniconda.html
 
 2. Create a fresh conda environment, and install all dependencies.
 
