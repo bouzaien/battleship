@@ -1,6 +1,7 @@
 ## Repository Setup
+1. Install Minicinda, follow https://docs.conda.io/en/latest/miniconda.html
 
-Create a fresh conda environment, and install all dependencies.
+2. Create a fresh conda environment, and install all dependencies.
 
 ```text
 conda create -n battleship python=3.8
@@ -10,7 +11,7 @@ cd battleship
 pip install -r requirements.txt
 ```
 
-Install this codebase as a package in this environment.
+3. Install this codebase as a package in this environment.
 ```
 python setup.py install --user
 ```
