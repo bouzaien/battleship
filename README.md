@@ -22,7 +22,7 @@ python src/play.py --show_position
 
 ## Simulate a Game
 
-To play a game, use the `src/simulate.py` script.
+To simulate a game, use the `src/simulate.py` script.
 
 
 ## Generate Data
