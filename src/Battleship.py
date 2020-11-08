@@ -17,15 +17,15 @@ class Battleship(object):
         By default, 2 ships of size 1x3 and 1x5 are placed on a 10x10 field.
         """
         assert len(ship_sizes) == num_ships
-        self.num_ships = num_ships
-        self.ship_sizes = ship_sizes
-        self.field_size = field_size
-        self.field = Field(self.field_size)
-        self.ships = [Ship(size) for size in self.ship_sizes]
+        self.field = Field(field_size)
+        self.ships = [Ship(size) for size in ship_sizes]
         self.fire_count = 0
 
-        for ship in self.ships:
-            self.placeShip(ship)            
+        for i, ship in enumerate(self.ships):
+            if ship.size[1] > sorted(field_size)[1]:
+                print('Ship {} is too big! Its size will be reduced.'.format(i+1))
+                ship.size = (ship.size[0], sorted(field_size)[1])
+            self.placeShip(ship)
     
     def placeShip(self, ship):
         """
@@ -34,12 +34,14 @@ class Battleship(object):
         init_coord = random.choice(list(self.field.cells.keys()))
         init_row, init_column = init_coord
         direction = random.choice([-1, 1])
+        # depending on the orientation, check if the ship is inside the field otherwise change direction
+        # TODO: update this function to place ships with 
         if ship.vertical:
-            if (init_row + direction * (ship.size[1]-1)) not in range(self.field_size[0]):
+            if (init_row + direction * (ship.size[1]-1)) not in range(self.field.size[0]):
                 direction = -direction
             ship_coords = [(x,init_column) for x in range(init_row, init_row + direction * ship.size[1], direction)]
         else:
-            if (init_column + direction * (ship.size[1]-1)) not in range(self.field_size[1]):
+            if (init_column + direction * (ship.size[1]-1)) not in range(self.field.size[1]):
                 direction = -direction
             ship_coords = [(init_row,y) for y in range(init_column, init_column + direction * ship.size[1], direction)]
 
@@ -95,14 +97,19 @@ class Battleship(object):
             self.fireCell(selected_cell)
             states.append(np.stack((sm, self.field.fire_matrix), axis=2))
             answers.append(sm[selected_cell.coords] == 1.0)
-        return states, answers
+        return np.asarray(states), np.asarray(answers)
 
     def showState(self, f, axarr):
+        if f is None:
+            f, axarr = plt.subplots(1, 2, sharex=True, sharey=True)
+            axarr[0].set_title("Ships")
+            axarr[1].set_title("Fired Positions")
+            for ax in axarr:
+                ax.set(adjustable='box', aspect='equal')
         fm = self.field.fire_matrix
         sm = self.field.ships_matrix
         sns.heatmap(sm, ax=axarr[0], vmin=0, vmax=2, cbar=False, linewidths=.5)
         sns.heatmap(fm * sm + fm, ax=axarr[1], vmin=0, vmax=2, cbar=False, linewidths=.5)
-        
         plt.ion()
         plt.show()
 
@@ -142,8 +149,9 @@ class Ship(object):
 class Field(object):
 
     def __init__(self, size: tuple):
-        self.cells = {(x,y): Cell((x,y)) for x in range(size[0]) for y in range(size[1])}
-        self.matrix = np.zeros(size+(2,))
+        self.size = size
+        self.cells = {(x,y): Cell((x,y)) for x in range(self.size[0]) for y in range(self.size[1])}
+        self.matrix = np.zeros(self.size+(2,))
         self.occupied_cells = list()
         self.free_cells = list(self.cells.values())
         self.fired_cells = list()
@@ -152,11 +160,14 @@ class Field(object):
         self.fire_matrix = self.matrix[:,:,1]
     
     def updateOccupied(self, new_occupied: list):
-        for cell in new_occupied:
+        for cell in set(new_occupied):
             cell.is_occupied = True
             self.matrix[cell.coords+(0,)] = 1.0
             self.occupied_cells.append(cell)
-            self.free_cells.remove(cell)
+            try:
+                self.free_cells.remove(cell)
+            except:
+                pass
 
     def updateFired(self, firedCell):
         firedCell.fire()
