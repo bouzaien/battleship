@@ -32,21 +32,23 @@ class Battleship(object):
         """
         Randomly place a ship in the field, and update its cells as well as the field occupied cells
         """
-        init_coord = random.choice(list(self.field.cells.keys()))
-        init_row, init_column = init_coord
-        direction = random.choice([-1, 1])
-        # depending on the orientation, check if the ship is inside the field otherwise change direction
-        # TODO: update this function to place ships with 
-        if ship.vertical:
-            if (init_row + direction * (ship.size[1]-1)) not in range(self.field.size[0]):
-                direction = -direction
-            ship_coords = [(x,init_column) for x in range(init_row, init_row + direction * ship.size[1], direction)]
-        else:
-            if (init_column + direction * (ship.size[1]-1)) not in range(self.field.size[1]):
-                direction = -direction
-            ship_coords = [(init_row,y) for y in range(init_column, init_column + direction * ship.size[1], direction)]
+        new_cells = []
+        while new_cells == [] or len(set(new_cells) & set(self.field.occupied_cells)):
+            init_coord = random.choice(list(self.field.cells.keys()))
+            init_row, init_column = init_coord
+            direction = random.choice([-1, 1])
+            # depending on the orientation, check if the ship is inside the field otherwise change direction
+            # TODO: update this function to place ships wider than 1 
+            if ship.vertical:
+                if (init_row + direction * (ship.size[1]-1)) not in range(self.field.size[0]):
+                    direction = -direction
+                ship_coords = [(x,init_column) for x in range(init_row, init_row + direction * ship.size[1], direction)]
+            else:
+                if (init_column + direction * (ship.size[1]-1)) not in range(self.field.size[1]):
+                    direction = -direction
+                ship_coords = [(init_row,y) for y in range(init_column, init_column + direction * ship.size[1], direction)]
 
-        new_cells = [self.field.cells[ship_coord] for ship_coord in ship_coords]
+            new_cells = [self.field.cells[ship_coord] for ship_coord in ship_coords]
         ship.setCells(new_cells)
         self.field.updateOccupied(new_cells)
 
@@ -66,10 +68,9 @@ class Battleship(object):
             while not b:
                 try:
                     sys.stdout.write("Move number {}\n".format(self.fire_count+1))
-                    sys.stdout.write("\r x ")
+                    sys.stdout.write("\r\r Choose x ")
                     x = int(input())
-                    sys.stdout.flush()
-                    sys.stdout.write("\r y ")
+                    sys.stdout.write("\r\r Choose y ")
                     y = int(input())
                     b = self.fireCell(self.field.cells[(x,y)])
                 except:
@@ -78,15 +79,15 @@ class Battleship(object):
             self.showState(f, axarr)
         print("Finished after {} moves.".format(self.fire_count))
     
-    def simulate(self):
+    def simulate(self, update_rate=0.5):
         f, axarr = self.init_fig(num_subplots=2)
+        sys.stdout.write("Simulating ...\n")
         while not all(map(Ship.isDestroyed, self.ships)):
-            sys.stdout.write("Move number {}\n".format(self.fire_count+1))
             selected_cell = random.choice(self.field.intact_cells)
             self.fireCell(selected_cell)
-            input()
+            plt.pause(update_rate)
             self.showState(f, axarr)
-        print("Finished after {} moves.".format(self.fire_count))
+        sys.stdout.write("Finished after {} moves.".format(self.fire_count))
     
     def genarateData(self):
         sm = self.field.ships_matrix
@@ -246,8 +247,4 @@ class Cell(object):
 
 
 if __name__ == "__main__":
-    k = 10
-    bs = Battleship()
-    states, answers = bs.genarateData()
-    print(states[k][:,:,0])
-    print(states[k][:,:,1])
+    pass
