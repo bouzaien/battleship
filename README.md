@@ -19,10 +19,10 @@ python setup.py install --user
 
 ## Play a Game
 
-To play a game, use the `src/play.py` script. Add `--show_position` argument to show the ships positions during the game.
+To play a game, use the `src/play.py` script. Add `--show_positions` argument to show the ships positions during the game.
 
 ```text
-python src/play.py --show_position
+python src/play.py --show_positions
 ```
 
 
@@ -53,5 +53,5 @@ python src/generate_data.py --games 1000 --output_folder data --file_name genera
 To perform unit tests, use the `src/test.py` without any parameters.
 
 ```text
-python src/test.py
+python tests/test.py
 ```
