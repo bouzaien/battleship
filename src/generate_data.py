@@ -12,19 +12,19 @@ def main():
     parser.add_argument(
         "--file_name", type=str, 
         default="generated_data", 
-        help="Output folder"
+        help="data file name"
     )
     
     parser.add_argument(
         "--output_folder", type=str, 
         default="data", 
-        help="Output folder"
+        help="data output folder"
     )
 
     parser.add_argument(
         "--games", type=int, 
         default="1000", 
-        help="Number of games simulated to generate data"
+        help="number of games simulated to generate data"
     )
 
     args = parser.parse_args()
