@@ -1,3 +1,4 @@
+import os
 import random
 import sys
 import time
@@ -57,9 +58,9 @@ class Battleship(object):
         print("Cell already fired. Choose another one!")
         return 0
 
-    def play(self):
+    def play(self, show_positions=False):
+        f, axarr = self.init_fig(num_subplots=show_positions+1)
         # while there is at least undestroyed ship
-        f, axarr = plt.subplots(1, 2, sharex=True, sharey=True)
         while not all(map(Ship.isDestroyed, self.ships)):
             b = False
             while not b:
@@ -78,9 +79,7 @@ class Battleship(object):
         print("Finished after {} moves.".format(self.fire_count))
     
     def simulate(self):
-        f, axarr = plt.subplots(1, 2, sharex=True, sharey=True)
-        for ax in axarr:
-            ax.set(adjustable='box', aspect='equal')
+        f, axarr = self.init_fig(num_subplots=2)
         while not all(map(Ship.isDestroyed, self.ships)):
             sys.stdout.write("Move number {}\n".format(self.fire_count+1))
             selected_cell = random.choice(self.field.intact_cells)
@@ -103,13 +102,23 @@ class Battleship(object):
         if f is None:
             f, axarr = plt.subplots(1, 2, sharex=True, sharey=True)
             axarr[0].set_title("Ships")
-            axarr[1].set_title("Fired Positions")
+            axarr[1].set_title("Fired Positions (Move made :{})".format(self.fire_count))
             for ax in axarr:
                 ax.set(adjustable='box', aspect='equal')
+
+        if not isinstance(axarr, (list, np.ndarray)):
+            axarr = [axarr]
         fm = self.field.fire_matrix
         sm = self.field.ships_matrix
-        sns.heatmap(sm, ax=axarr[0], vmin=0, vmax=2, cbar=False, linewidths=.5)
-        sns.heatmap(fm * sm + fm, ax=axarr[1], vmin=0, vmax=2, cbar=False, linewidths=.5)
+        
+        if len(axarr) == 1:
+            sns.heatmap(fm * sm + fm, ax=axarr[0], vmin=0, vmax=2, cbar=False, linewidths=.5)
+            axarr[0].set_title("Fired Positions (Move made :{})".format(self.fire_count))
+        else:
+            sns.heatmap(sm, ax=axarr[0], vmin=0, vmax=2, cbar=False, linewidths=.5)
+            sns.heatmap(fm * sm + fm, ax=axarr[1], vmin=0, vmax=2, cbar=False, linewidths=.5)
+            axarr[0].set_title("Ships")
+            axarr[1].set_title("Fired Positions (Move made :{})".format(self.fire_count))
         plt.ion()
         plt.show()
 
@@ -123,6 +132,26 @@ class Battleship(object):
         plt.imshow(sm, interpolation='nearest')
         plt.show()
 
+    def init_fig(self, num_subplots):
+        f, axarr = plt.subplots(1, num_subplots, sharex=True, sharey=True)
+        if not isinstance(axarr, (list, np.ndarray)):
+            axarr = [axarr]
+        fm = self.field.fire_matrix
+        sm = self.field.ships_matrix
+        if num_subplots == 1:
+            sns.heatmap(fm * sm + fm, ax=axarr[0], vmin=0, vmax=2, cbar=False, linewidths=.5)
+            axarr[0].set_title("Fired Positions")
+            axarr[0].set(adjustable='box', aspect='equal')
+        else:
+            sns.heatmap(sm, ax=axarr[0], vmin=0, vmax=2, cbar=False, linewidths=.5)
+            sns.heatmap(fm * sm + fm, ax=axarr[1], vmin=0, vmax=2, cbar=False, linewidths=.5)
+            axarr[0].set_title("Ships")
+            axarr[1].set_title("Fired Positions")
+            for ax in axarr:
+                ax.set(adjustable='box', aspect='equal')
+        plt.ion()
+        plt.show()
+        return f, axarr
 
 
 class Ship(object):
