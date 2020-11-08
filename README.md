@@ -11,8 +11,9 @@ pip install -r requirements.txt
 ```
 
 Install this codebase as a package in this environment.
-
+```
 python setup.py install --user
+```
 
 
 ## Play a Game
